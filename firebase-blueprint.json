@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "repaymentDay": {
+      "title": "RepaymentDay",
+      "description": "Repayment day entry details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "dayIndex": { "type": "integer" },
+        "dueDate": { "type": "string" },
+        "amount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "paidDate": { "type": "string" },
+        "isPaid": { "type": "boolean" }
+      },
+      "required": ["id", "dayIndex", "dueDate", "amount", "paidAmount", "isPaid"]
+    },
+    "paymentLog": {
+      "title": "PaymentLog",
+      "description": "Log of individual payment transactions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" },
+        "note": { "type": "string" }
+      },
+      "required": ["id", "amount", "date"]
+    },
+    "videoAttachment": {
+      "title": "VideoAttachment",
+      "description": "Video proof / note of agreement",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "title", "url", "fileName", "date"]
+    },
+    "debtor": {
+      "title": "Debtor",
+      "description": "Debtor agreement details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "phone": { "type": "string" },
+        "amountGiven": { "type": "number" },
+        "termDays": { "type": "number" },
+        "startDate": { "type": "string" },
+        "interestPercent": { "type": "number" },
+        "markupGiven": { "type": "number" },
+        "totalExpected": { "type": "number" },
+        "dailyInstallment": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "completed", "overdue", "loss"] },
+        "notes": { "type": "string" },
+        "repaymentSchedule": { "type": "array" },
+        "paymentLogs": { "type": "array" },
+        "videos": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "phone",
+        "amountGiven",
+        "termDays",
+        "startDate",
+        "interestPercent",
+        "markupGiven",
+        "totalExpected",
+        "dailyInstallment",
+        "status",
+        "notes",
+        "repaymentSchedule",
+        "paymentLogs",
+        "createdAt"
+      ]
+    },
+    "settings": {
+      "title": "AppSettings",
+      "description": "App personalization settings",
+      "type": "object",
+      "properties": {
+        "projectName": { "type": "string" },
+        "bgType": { "type": "string", "enum": ["image", "gradient", "solid", "system"] },
+        "customBgUrl": { "type": "string" },
+        "bgPreset": { "type": "string" },
+        "themeColor": { "type": "string" },
+        "telegramPhone": { "type": "string" },
+        "telegramUsername": { "type": "string" }
+      },
+      "required": ["projectName", "bgType", "customBgUrl", "bgPreset", "themeColor"]
+    }
+  },
+  "firestore": {
+    "/debtors/{debtorId}": {
+      "schema": "debtor",
+      "description": "Collection of all debtor documents"
+    },
+    "/settings/global": {
+      "schema": "settings",
+      "description": "Global application configuration document"
+    }
+  }
+}

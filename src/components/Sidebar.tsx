@@ -7,16 +7,25 @@ import {
   Menu, 
   X, 
   CircleDollarSign,
-  TrendingUp
+  TrendingUp,
+  LogOut
 } from "lucide-react";
 
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
   projectName: string;
+  userEmail?: string | null;
+  onLogout?: () => void;
 }
 
-export default function Sidebar({ currentTab, setCurrentTab, projectName }: SidebarProps) {
+export default function Sidebar({ 
+  currentTab, 
+  setCurrentTab, 
+  projectName,
+  userEmail,
+  onLogout
+}: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -132,16 +141,51 @@ export default function Sidebar({ currentTab, setCurrentTab, projectName }: Side
         </nav>
 
         {/* Footer / User Profile section from bento grid design */}
-        <div className={`mt-auto ${isHovered ? "p-3" : "p-3 lg:p-2"} border-t border-zinc-800/80 bg-zinc-950/40`}>
-          <div className={`flex items-center gap-3 ${isHovered ? "p-3" : "p-2.5 lg:justify-center"} bg-zinc-850/60 rounded-2xl border border-zinc-800/40 hover:border-zinc-700/40 transition-colors`}>
-            <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center font-bold text-white uppercase text-xs shadow-md shrink-0">
-              AV
+        <div className={`mt-auto ${isHovered ? "p-3" : "p-3 lg:p-2"} border-t border-zinc-800/80 bg-zinc-950/40 flex flex-col gap-2`}>
+          <div className={`flex items-center justify-between gap-2 ${isHovered ? "p-3" : "p-2.5 lg:justify-center"} bg-zinc-850/60 rounded-2xl border border-zinc-800/40 hover:border-zinc-700/40 transition-colors`}>
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center font-bold text-white uppercase text-xs shadow-md shrink-0">
+                {userEmail ? userEmail.substring(0, 2).toUpperCase() : "O'"}
+              </div>
+              <div className={`transition-all duration-300 flex flex-col ${isHovered ? "opacity-100 max-w-[130px]" : "lg:opacity-0 lg:max-w-0 lg:overflow-hidden"}`}>
+                <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-mono whitespace-nowrap truncate" title={userEmail || "O'qituvchi"}>
+                  {userEmail || "O'qituvchi"}
+                </p>
+                <p className="text-xs font-black text-zinc-200 whitespace-nowrap">O'qituvchi</p>
+              </div>
             </div>
-            <div className={`transition-all duration-300 flex flex-col ${isHovered ? "opacity-100 max-w-xs" : "lg:opacity-0 lg:max-w-0 lg:overflow-hidden"}`}>
-              <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-mono whitespace-nowrap">Ali Valiyev</p>
-              <p className="text-xs font-black text-zinc-200 whitespace-nowrap">Bosh operator</p>
-            </div>
+            
+            {onLogout && isHovered && (
+              <button
+                onClick={onLogout}
+                className="p-1.5 hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
+                title="Tizimdan chiqish"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
+
+          {onLogout && !isHovered && (
+            <button
+              onClick={onLogout}
+              className="w-full lg:flex hidden items-center justify-center py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-450 hover:text-rose-450 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer"
+              title="Tizimdan chiqish"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="w-full lg:hidden flex items-center justify-center gap-2 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-450 hover:text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 cursor-pointer mt-1"
+              title="Tizimdan chiqish"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Tizimdan Chiqish</span>
+            </button>
+          )}
         </div>
       </aside>
     </>

@@ -1046,11 +1046,11 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
                     p-3.5 rounded-2xl border transition-all duration-205 cursor-pointer flex justify-between items-center group/card
                     ${day.isPaid 
                       ? isDark 
-                        ? "bg-blue-500/10 border-blue-500/40 text-blue-400 font-bold" 
-                        : "bg-blue-50/80 border-blue-200 text-blue-800 font-bold"
+                        ? "bg-blue-500/10 border-blue-500/40 text-blue-400 font-bold hover:bg-blue-500/15" 
+                        : "bg-blue-50/80 border-blue-300 text-blue-800 font-bold hover:bg-blue-100/50"
                       : isDark
-                        ? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:border-rose-500/50 transition-all animate-pulse-subtle"
-                        : "bg-rose-50/60 border-rose-150 text-rose-800 hover:border-rose-300"
+                        ? "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:border-rose-500/50 transition-all"
+                        : "bg-rose-50/40 border-rose-450 border-rose-400 text-rose-800 hover:border-rose-600"
                     }
                   `}
                 >
@@ -1058,7 +1058,11 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
                     <span className="text-[9px] font-extrabold font-mono text-zinc-400 tracking-wider block">
                       {day.dayIndex}-KUN
                     </span>
-                    <span className="font-mono font-extrabold text-sm select-all">
+                    <span className={`font-mono font-black text-sm select-all ${
+                      day.isPaid 
+                        ? isDark ? "text-blue-400" : "text-blue-600" 
+                        : isDark ? "text-rose-400" : "text-rose-600"
+                    }`}>
                       {formatCurrency(day.amount)}
                     </span>
                     <span className="text-[9px] text-zinc-450 font-mono block">
@@ -1066,13 +1070,21 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 font-mono">
+                  <div className="flex items-center gap-1 font-mono shrink-0">
                     {day.isPaid ? (
-                      <span className="p-1 px-2 rounded-xl bg-blue-500/20 text-blue-500 border border-blue-400/20 text-[10px] font-bold flex items-center gap-0.5">
-                        <Check className="w-3 h-3" /> To'landi (Ko'k)
+                      <span className={`p-1 px-2.5 rounded-xl border text-[10px] font-bold flex items-center gap-0.5 ${
+                        isDark 
+                          ? "bg-blue-500/20 text-blue-400 border-blue-500/35" 
+                          : "bg-blue-100 text-blue-700 border-blue-300"
+                      }`}>
+                        <Check className="w-3 h-3 text-blue-600" /> To'landi (Ko'k)
                       </span>
                     ) : (
-                      <span className="p-1 px-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-450/20 text-[10px] font-bold flex items-center gap-0.5 animate-pulse">
+                      <span className={`p-1 px-2.5 rounded-xl border text-[10px] font-bold flex items-center gap-0.5 ${
+                        isDark 
+                          ? "bg-rose-500/15 text-rose-400 border-rose-500/25" 
+                          : "bg-rose-100 text-rose-700 border-rose-300"
+                      }`}>
                         Kutilmoqda (Qizil)
                       </span>
                     )}

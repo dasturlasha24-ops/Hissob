@@ -6,8 +6,21 @@ import AddDebtor from "./components/AddDebtor";
 import DebtorDetails from "./components/DebtorDetails";
 import Settings from "./components/Settings";
 import SuccessPopup from "./components/SuccessPopup";
+import Login from "./components/Login";
+import LogoutConfirm from "./components/LogoutConfirm";
 import { Debtor, Settings as SettingsType } from "./types";
 import { defaultDebtors } from "./utils";
+import { 
+  collection, 
+  getDocs, 
+  setDoc, 
+  doc, 
+  deleteDoc, 
+  getDoc,
+  getDocFromServer
+} from "firebase/firestore";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 
 const LOCAL_STORAGE_DEBTORS_KEY = "qarz_daftari_debtors_v2_clean";
 const LOCAL_STORAGE_SETTINGS_KEY = "qarz_daftari_settings_v1";
@@ -26,7 +39,10 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<string>("dashboard");
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [settings, setSettings] = useState<SettingsType>(defaultSettings);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedDebtorId, setSelectedDebtorId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   const [popupData, setPopupData] = useState<{
     isOpen: boolean;
     type: "kirim" | "chiqim";
@@ -48,56 +64,143 @@ export default function App() {
     });
   };
 
-  // Load from local storage on mount
-  useEffect(() => {
+  const loadData = async () => {
+    setIsLoading(true);
     try {
+      // 1. Test database connection
+      try {
+        await getDocFromServer(doc(db, "test", "connection"));
+      } catch (connectionErr) {
+        console.warn("Firestore connection check info:", connectionErr);
+      }
+
+      // 2. Fetch debtors from Firestore
+      const debtorsCollection = collection(db, "debtors");
+      const snapshot = await getDocs(debtorsCollection);
+      const loadedDebtors: Debtor[] = [];
+      snapshot.forEach((docSnap) => {
+        loadedDebtors.push(docSnap.data() as Debtor);
+      });
+
+      // Sort by createdAt descending
+      loadedDebtors.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setDebtors(loadedDebtors);
+      localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(loadedDebtors));
+
+      // 3. Fetch settings from Firestore
+      const settingsDocRef = doc(db, "settings", "global");
+      const settingsSnap = await getDoc(settingsDocRef);
+      if (settingsSnap.exists()) {
+        const loadedSettings = settingsSnap.data() as SettingsType;
+        setSettings(loadedSettings);
+        localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(loadedSettings));
+      } else {
+        await setDoc(settingsDocRef, defaultSettings);
+        setSettings(defaultSettings);
+        localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(defaultSettings));
+      }
+    } catch (e) {
+      console.error("Firestore loading failed, falling back to local storage:", e);
+      // Fallback to LocalStorage
       const storedDebtors = localStorage.getItem(LOCAL_STORAGE_DEBTORS_KEY);
       if (storedDebtors) {
         setDebtors(JSON.parse(storedDebtors));
       } else {
-        // Initialize with realistic demo debtors for a rich initial experience
-        setDebtors(defaultDebtors);
-        localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(defaultDebtors));
+        setDebtors([]);
       }
 
       const storedSettings = localStorage.getItem(LOCAL_STORAGE_SETTINGS_KEY);
       if (storedSettings) {
         setSettings(JSON.parse(storedSettings));
       } else {
-        localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(defaultSettings));
+        setSettings(defaultSettings);
       }
-    } catch (e) {
-      console.error("Local storage error during load", e);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Listen to Auth state changes on mount
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        loadData();
+      } else {
+        setDebtors([]);
+        setIsLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // Save actions to local storage helper
-  const saveDebtors = (updatedDebtors: Debtor[]) => {
-    setDebtors(updatedDebtors);
-    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(updatedDebtors));
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Logout error", e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleAddDebtor = (newDebtor: Debtor) => {
+  const handleAddDebtor = async (newDebtor: Debtor) => {
+    // Optimistic UI update
     const updated = [newDebtor, ...debtors];
-    saveDebtors(updated);
+    setDebtors(updated);
+    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(updated));
+
+    // Write to Firestore
+    try {
+      await setDoc(doc(db, "debtors", newDebtor.id), newDebtor);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `debtors/${newDebtor.id}`);
+    }
   };
 
-  const handleUpdateDebtor = (updatedDebtor: Debtor) => {
+  const handleUpdateDebtor = async (updatedDebtor: Debtor) => {
+    // Optimistic UI update
     const updated = debtors.map((d) => (d.id === updatedDebtor.id ? updatedDebtor : d));
-    saveDebtors(updated);
+    setDebtors(updated);
+    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(updated));
+
+    // Update in Firestore
+    try {
+      await setDoc(doc(db, "debtors", updatedDebtor.id), updatedDebtor);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `debtors/${updatedDebtor.id}`);
+    }
   };
 
-  const handleDeleteDebtor = (id: string) => {
+  const handleDeleteDebtor = async (id: string) => {
+    // Optimistic UI update
     const updated = debtors.filter((d) => d.id !== id);
-    saveDebtors(updated);
+    setDebtors(updated);
+    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(updated));
     if (selectedDebtorId === id) {
       setSelectedDebtorId(null);
     }
+
+    // Delete from Firestore
+    try {
+      await deleteDoc(doc(db, "debtors", id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `debtors/${id}`);
+    }
   };
 
-  const handleUpdateSettings = (newSettings: SettingsType) => {
+  const handleUpdateSettings = async (newSettings: SettingsType) => {
     setSettings(newSettings);
     localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(newSettings));
+
+    // Write settings to Firestore
+    try {
+      await setDoc(doc(db, "settings", "global"), newSettings);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "settings/global");
+    }
   };
 
   // Backups: Export as JSON file
@@ -124,15 +227,26 @@ export default function App() {
     try {
       const parsed = JSON.parse(jsonData);
       if (parsed && Array.isArray(parsed.debtors)) {
-        // Simple valid checks
         const importedDebtors = parsed.debtors as Debtor[];
         setDebtors(importedDebtors);
         localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(importedDebtors));
+
+        // Sync all imported debtors to Firestore in the background
+        importedDebtors.forEach(async (debtor) => {
+          try {
+            await setDoc(doc(db, "debtors", debtor.id), debtor);
+          } catch (e) {
+            console.error(`Failed to sync imported debtor ${debtor.id} to Firestore`, e);
+          }
+        });
 
         if (parsed.settings && parsed.settings.projectName) {
           const importedSettings = parsed.settings as SettingsType;
           setSettings(importedSettings);
           localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(importedSettings));
+          setDoc(doc(db, "settings", "global"), importedSettings).catch((err) => {
+            console.error("Failed to sync settings to Firestore", err);
+          });
         }
         return true;
       }
@@ -143,14 +257,25 @@ export default function App() {
     }
   };
 
-  // Total reset back to demo
-  const handleResetData = () => {
-    setDebtors(defaultDebtors);
-    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify(defaultDebtors));
+  // Total reset back to clean state
+  const handleResetData = async () => {
+    const previousDebtors = [...debtors];
+    setDebtors([]);
+    localStorage.setItem(LOCAL_STORAGE_DEBTORS_KEY, JSON.stringify([]));
     setSettings(defaultSettings);
     localStorage.setItem(LOCAL_STORAGE_SETTINGS_KEY, JSON.stringify(defaultSettings));
     setCurrentTab("dashboard");
     setSelectedDebtorId(null);
+
+    // Reset database
+    try {
+      for (const debtor of previousDebtors) {
+        await deleteDoc(doc(db, "debtors", debtor.id));
+      }
+      await setDoc(doc(db, "settings", "global"), defaultSettings);
+    } catch (e) {
+      console.error("Firestore reset failed", e);
+    }
   };
 
   const handleSelectDebtor = (id: string) => {
@@ -187,6 +312,28 @@ export default function App() {
     return "bg-slate-950 text-white"; // default dark back
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-semibold tracking-wider text-zinc-400 uppercase animate-pulse">
+            Tizimga ulanmoqda...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Login 
+        onSuccess={() => {}} 
+        projectName={settings.projectName}
+      />
+    );
+  }
+
   return (
     <div 
       className={`min-h-screen flex flex-col lg:flex-row relative transition-all duration-300 ${isDarkBg ? "text-slate-100" : "text-zinc-950"} ${getBackgroundClass()}`}
@@ -208,6 +355,8 @@ export default function App() {
             }
           }} 
           projectName={settings.projectName}
+          userEmail={user.email}
+          onLogout={() => setShowLogoutConfirm(true)}
         />
       </div>
 
@@ -288,6 +437,14 @@ export default function App() {
         type={popupData.type}
         amount={popupData.amount}
         debtorName={popupData.debtorName}
+        isDark={isDarkBg}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirm
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
         isDark={isDarkBg}
       />
     </div>
