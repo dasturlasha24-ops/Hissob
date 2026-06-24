@@ -27,8 +27,8 @@ const LOCAL_STORAGE_SETTINGS_KEY = "qarz_daftari_settings_v1";
 
 const defaultSettings: SettingsType = {
   projectName: "Hisob-Kitob & Qarz Daftari",
-  bgType: "solid",
-  bgPreset: "",
+  bgType: "gradient",
+  bgPreset: "bg-gradient-to-br from-[#060b21] via-[#0b1739] to-[#020617]",
   customBgUrl: "",
   themeColor: "blue",
   telegramPhone: "",
@@ -299,17 +299,16 @@ export default function App() {
     return {};
   };
 
-  const isDarkBg = settings.bgType === "image" || settings.bgType === "gradient";
+  const isDarkBg = true; // Always premium eye-friendly dark blue theme as requested
 
   const getBackgroundClass = () => {
     if (settings.bgType === "solid" || settings.bgType === "system") {
-      return "bg-zinc-100 text-zinc-950";
+      return "bg-[#060b21] text-slate-100";
     }
     if (settings.bgType === "gradient") {
-      // bgPreset contains the custom css class for styling gradients
-      return settings.bgPreset || "bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white";
+      return settings.bgPreset || "bg-gradient-to-br from-[#060b21] via-[#0b1739] to-[#020617] text-white";
     }
-    return "bg-slate-950 text-white"; // default dark back
+    return "bg-[#060b21] text-white"; // default deep dark blue/navy
   };
 
   if (isLoading) {

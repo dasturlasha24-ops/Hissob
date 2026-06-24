@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Debtor, RepaymentDay, Settings as SettingsType } from "../types";
 import { formatCurrency, addDays } from "../utils";
+import ConfirmModal from "./ConfirmModal";
 import { 
   ArrowLeft, 
   Phone, 
@@ -52,10 +53,13 @@ export default function DebtorDetails({
   const [customPayAmount, setCustomPayAmount] = useState<number>(debtor.dailyInstallment);
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Video Evidence states
   const [videoTitle, setVideoTitle] = useState("");
   const [activePlayVideo, setActivePlayVideo] = useState<string | null>(null);
+  const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
+  const [videoToAdd, setVideoToAdd] = useState<{ title: string; url: string; fileName: string; size?: string } | null>(null);
 
   const handleAddVideo = (title: string, url: string, fileName: string, size?: string) => {
     const newVideo = {
@@ -93,8 +97,10 @@ export default function DebtorDetails({
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1) + " MB";
     const defaultTitle = videoTitle.trim() || file.name.replace(/\.[^/.]+$/, "");
     
-    handleAddVideo(defaultTitle, url, file.name, sizeMB);
+    setVideoToAdd({ title: defaultTitle, url, fileName: file.name, size: sizeMB });
     setVideoTitle("");
+    // Reset file input value so same file can be uploaded again if needed
+    e.target.value = "";
   };
 
   // States for simple details editing
@@ -386,10 +392,7 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
           {/* Delete Debtor */}
           <button
             onClick={() => {
-              if (confirm(`${debtor.firstName} ${debtor.lastName} ismidagi barcha qarz yozuvlarini butunlay o'chirib yuborasizmi?`)) {
-                onDeleteDebtor(debtor.id);
-                onBack();
-              }
+              setShowDeleteConfirm(true);
             }}
             className="px-3.5 py-2 text-xs font-bold rounded-2xl bg-rose-50 border border-rose-205 hover:bg-rose-650 hover:text-white text-rose-700 flex items-center gap-1.5 cursor-pointer transition-all duration-150 ml-1"
           >
@@ -904,14 +907,14 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className={`text-[9.5px] font-mono font-bold shrink-0 hidden sm:inline-block ${
                         isDark ? "text-zinc-500" : "text-zinc-400"
                       }`}>
                         {video.date}
                       </span>
                       <button 
-                        onClick={() => handleDeleteVideo(video.id)}
+                        onClick={() => setVideoToDelete(video.id)}
                         className={`p-2 rounded-xl cursor-pointer hover:bg-rose-500/10 text-zinc-400 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20`}
                         title="O'chirish"
                       >
@@ -933,12 +936,12 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleAddVideo(
-                    "Og'zaki kelishuv shartnomasi", 
-                    "https://assets.mixkit.co/videos/preview/mixkit-writing-on-a-paper-with-a-fountain-pen-42280-large.mp4",
-                    "tilxat-shartnoma.mp4",
-                    "2.4 MB"
-                  )}
+                  onClick={() => setVideoToAdd({
+                    title: "Og'zaki kelishuv shartnomasi", 
+                    url: "https://assets.mixkit.co/videos/preview/mixkit-writing-on-a-paper-with-a-fountain-pen-42280-large.mp4",
+                    fileName: "tilxat-shartnoma.mp4",
+                    size: "2.4 MB"
+                  })}
                   className={`px-3 py-2 rounded-xl text-[10px] font-black text-left flex items-center justify-between border cursor-pointer transition-all ${
                     isDark
                       ? "bg-zinc-950/40 border-zinc-800 text-zinc-300 hover:bg-zinc-850"
@@ -950,12 +953,12 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleAddVideo(
-                    "Kassa kirim-chiqim hisoblash", 
-                    "https://assets.mixkit.co/videos/preview/mixkit-hand-counting-gold-coins-on-table-39832-large.mp4",
-                    "kassa-hisob-tangalar.mp4",
-                    "3.1 MB"
-                  )}
+                  onClick={() => setVideoToAdd({
+                    title: "Kassa kirim-chiqim hisoblash", 
+                    url: "https://assets.mixkit.co/videos/preview/mixkit-hand-counting-gold-coins-on-table-39832-large.mp4",
+                    fileName: "kassa-hisob-tangalar.mp4",
+                    size: "3.1 MB"
+                  })}
                   className={`px-3 py-2 rounded-xl text-[10px] font-black text-left flex items-center justify-between border cursor-pointer transition-all ${
                     isDark
                       ? "bg-zinc-950/40 border-zinc-800 text-zinc-300 hover:bg-zinc-850"
@@ -1136,6 +1139,58 @@ Tizim: ${settings?.projectName || "Qarz Daftari"}`;
         </div>
 
       </div>
+
+      {/* Custom Confirm Modal for Deletion */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          onDeleteDebtor(debtor.id);
+          onBack();
+        }}
+        title="Mijozni o'chirish"
+        message={`${debtor.firstName} ${debtor.lastName} ismidagi barcha qarz yozuvlarini butunlay o'chirib yuborasizmi?`}
+        confirmText="Ha, o'chirish"
+        cancelText="Bekor qilish"
+        isDark={isDark}
+        variant="danger"
+      />
+
+      {/* Custom Confirm Modal for Video Deletion */}
+      <ConfirmModal
+        isOpen={videoToDelete !== null}
+        onClose={() => setVideoToDelete(null)}
+        onConfirm={() => {
+          if (videoToDelete) {
+            handleDeleteVideo(videoToDelete);
+            setVideoToDelete(null);
+          }
+        }}
+        title="Video guvohlikni o'chirish"
+        message="Haqiqatdan ham ushbu video guvohlik yozuvini butunlay o'chirib yubormoqchimisiz?"
+        confirmText="Ha, o'chirish"
+        cancelText="Bekor qilish"
+        isDark={isDark}
+        variant="danger"
+      />
+
+      {/* Custom Confirm Modal for Video Addition */}
+      <ConfirmModal
+        isOpen={videoToAdd !== null}
+        onClose={() => setVideoToAdd(null)}
+        onConfirm={() => {
+          if (videoToAdd) {
+            handleAddVideo(videoToAdd.title, videoToAdd.url, videoToAdd.fileName, videoToAdd.size);
+            setVideoToAdd(null);
+          }
+        }}
+        title="Video guvohlik qo'shish"
+        message={videoToAdd ? `Ushbu video guvohlikni ("${videoToAdd.title}") saqlashni tasdiqlaysizmi?` : ""}
+        confirmText="Ha, saqlash"
+        cancelText="Bekor qilish"
+        isDark={isDark}
+        variant="info"
+      />
     </div>
   );
 }

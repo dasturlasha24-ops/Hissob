@@ -44,9 +44,9 @@ export default function Sidebar({
   return (
     <>
       {/* Mobile Top Bar */}
-      <header className="lg:hidden w-full backdrop-blur-md bg-zinc-900/95 text-white border-b border-zinc-800 px-4 py-3 flex justify-between items-center z-40 fixed top-0 left-0">
+      <header className="lg:hidden w-full backdrop-blur-md bg-[#09112e]/95 text-white border-b border-[#1a2652]/60 px-4 py-3 flex justify-between items-center z-40 fixed top-0 left-0">
         <div className="flex items-center gap-2">
-          <div className="bg-blue-500 p-2 rounded-lg text-white">
+          <div className="bg-blue-600 p-2 rounded-lg text-white">
             <CircleDollarSign className="w-5 h-5" />
           </div>
           <span className="font-bold tracking-tight uppercase text-sm">
@@ -55,7 +55,7 @@ export default function Sidebar({
         </div>
         <button 
           onClick={() => setIsOpen(!isOpen)} 
-          className="p-2 hover:bg-zinc-850 rounded-lg transition-colors focus:outline-none"
+          className="p-2 hover:bg-[#131d45] rounded-lg transition-colors focus:outline-none"
           aria-label="Toggle Menu"
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -76,19 +76,19 @@ export default function Sidebar({
         onMouseLeave={() => setIsHovered(false)}
         className={`
           fixed inset-y-0 left-0 z-50 
-          bg-zinc-900 text-white
+          bg-[#09112e]/95 text-white backdrop-blur-xl
           flex flex-col h-full transition-all duration-300 ease-in-out
           lg:translate-x-0 lg:static lg:h-screen lg:flex-shrink-0
           ${isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0"}
           ${isOpen ? "pt-0" : "pt-16 lg:pt-0"}
           ${isHovered ? "lg:w-64" : "lg:w-[76px]"}
-          border-r border-zinc-800
+          border-r border-[#1a2652]/60
         `}
       >
         {/* Header section */}
-        <div className="p-6 lg:px-5 border-b border-zinc-800/80 flex items-center justify-between">
+        <div className="p-6 lg:px-5 border-b border-[#1a2652]/50 flex items-center justify-between">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8.5 h-8.5 bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 rounded-xl flex items-center justify-center font-black text-lg text-white shrink-0 shadow-lg shadow-blue-500/10 tracking-wider">
+            <div className="w-8.5 h-8.5 bg-gradient-to-tr from-blue-600 via-indigo-650 to-violet-500 rounded-xl flex items-center justify-center font-black text-lg text-white shrink-0 shadow-lg shadow-blue-500/10 tracking-wider">
               {projectName ? projectName.charAt(0).toUpperCase() : "F"}
             </div>
             <div className={`flex flex-col transition-all duration-300 ${isHovered ? "opacity-100 max-w-[170px] ml-1" : "lg:opacity-0 lg:max-w-0 lg:overflow-hidden"}`}>
@@ -103,7 +103,7 @@ export default function Sidebar({
           {isOpen && (
             <button 
               onClick={() => setIsOpen(false)} 
-              className="lg:hidden p-1.5 hover:bg-zinc-850 rounded-lg transition-colors text-zinc-400 hover:text-white"
+              className="lg:hidden p-1.5 hover:bg-[#131d45] rounded-lg transition-colors text-zinc-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -123,8 +123,8 @@ export default function Sidebar({
                   w-full flex items-center gap-3 ${isHovered ? "px-4 justify-start" : "px-4 lg:px-0 lg:justify-center"} py-3 rounded-xl text-xs font-black uppercase tracking-wider
                   transition-all duration-200 cursor-pointer group
                   ${isActive 
-                    ? "bg-zinc-800 text-blue-400 border-l-3 border-blue-500 shadow-md" 
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-850/60"
+                    ? "bg-blue-600/25 text-blue-400 border-l-3 border-blue-500 shadow-md" 
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-[#131d45]/60"
                   }
                 `}
               >
@@ -141,8 +141,8 @@ export default function Sidebar({
         </nav>
 
         {/* Footer / User Profile section from bento grid design */}
-        <div className={`mt-auto ${isHovered ? "p-3" : "p-3 lg:p-2"} border-t border-zinc-800/80 bg-zinc-950/40 flex flex-col gap-2`}>
-          <div className={`flex items-center justify-between gap-2 ${isHovered ? "p-3" : "p-2.5 lg:justify-center"} bg-zinc-850/60 rounded-2xl border border-zinc-800/40 hover:border-zinc-700/40 transition-colors`}>
+        <div className={`mt-auto ${isHovered ? "p-3" : "p-3 lg:p-2"} border-t border-[#1a2652]/60 bg-[#060b21]/60 flex flex-col gap-2`}>
+          <div className={`flex items-center justify-between gap-2 ${isHovered ? "p-3" : "p-2.5 lg:justify-center"} bg-[#131d45] rounded-2xl border border-[#1a2652]/40 hover:border-[#213271]/40 transition-colors`}>
             <div className="flex items-center gap-3 overflow-hidden">
               <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center font-bold text-white uppercase text-xs shadow-md shrink-0">
                 {userEmail ? userEmail.substring(0, 2).toUpperCase() : "O'"}

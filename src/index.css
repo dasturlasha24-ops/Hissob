@@ -4,6 +4,18 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-zinc-950: #040815;
+  --color-zinc-900: #0b132f;
+  --color-zinc-850: #111d42;
+  --color-zinc-800: #1a2754;
+  --color-zinc-700: #22326b;
+  --color-zinc-600: #2d4085;
+  --color-zinc-500: #3f56a5;
+  --color-zinc-400: #8c9bc8;
+  --color-zinc-300: #b3bede;
+  --color-zinc-200: #d0d6eb;
+  --color-zinc-100: #eef1fc;
 }
 
 @layer base {

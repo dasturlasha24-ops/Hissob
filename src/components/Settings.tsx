@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Settings as SettingsType } from "../types";
+import ConfirmModal from "./ConfirmModal";
 import { 
   Settings as SettingsIcon, 
   Save, 
@@ -39,6 +40,7 @@ export default function Settings({
   const [themeColor, setThemeColor] = useState(settings.themeColor);
   const [telegramPhone, setTelegramPhone] = useState(settings.telegramPhone || "");
   const [telegramUsername, setTelegramUsername] = useState(settings.telegramUsername || "");
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: "" });
   const [saveStatus, setSaveStatus] = useState(false);
@@ -450,9 +452,7 @@ export default function Settings({
             <button
               type="button"
               onClick={() => {
-                if (confirm("DIQQAT! Barcha kiritilgan shaxsiy qarz yozuvlari va to'lovlar butunlay o'chib ketadi. Amallarni tasdiqlaysizmi?")) {
-                  onResetData();
-                }
+                setShowResetConfirm(true);
               }}
               className="w-full py-3.5 text-xs font-extrabold rounded-2xl bg-rose-50 border border-rose-200 hover:bg-rose-600 hover:text-white hover:border-rose-650 cursor-pointer transition-all flex items-center justify-center gap-1.5 text-rose-700 uppercase tracking-wider"
             >
@@ -464,6 +464,19 @@ export default function Settings({
         </div>
 
       </div>
+
+      {/* Custom Confirm Modal for Full Reset */}
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={onResetData}
+        title="Ma'lumotlarni tozalash"
+        message="DIQQAT! Barcha kiritilgan shaxsiy qarz yozuvlari va to'lovlar butunlay o'chib ketadi. Amallarni tasdiqlaysizmi?"
+        confirmText="Ha, butunlay tozalash"
+        cancelText="Bekor qilish"
+        isDark={isDark}
+        variant="danger"
+      />
     </div>
   );
 }
