@@ -103,7 +103,7 @@ export default function Login({ onSuccess, projectName }: LoginProps) {
             {projectName || "Qarz Daftari"}
           </h1>
           <p className="text-sm font-mono tracking-widest text-zinc-400 uppercase font-bold">
-            🔒 O'QITUVCHILAR PORTALI
+            🔒 BELONGS TO AFZALBEK
           </p>
         </div>
 
