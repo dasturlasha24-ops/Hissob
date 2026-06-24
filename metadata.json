@@ -1,0 +1,6 @@
+{
+  "name": "Shaxsiy Hisob-Kitob va Qarz Daftari",
+  "description": "Qarzdorlarni ro'yxatga olish, kunlik bo'lib-bo'lib to'lash jadvallari, foyda va ziyon tahlili, hamda fonga rasm va loyiha nomini moslashtirish imkoniyatiga ega shaxsiy moliyaviy ilova.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
