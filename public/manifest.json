@@ -1,0 +1,30 @@
+{
+  "name": "Hisob",
+  "short_name": "Hisob",
+  "description": "Afzalbekka Tegishli Hisob-Kitob & Qarz Daftari",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060b21",
+  "theme_color": "#060b21",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/hisob_pwa_icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/hisob_pwa_icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/hisob_pwa_icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}

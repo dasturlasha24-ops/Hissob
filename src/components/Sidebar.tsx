@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PWAInstallBanner from "./PWAInstallBanner";
 import { 
   LayoutDashboard, 
   Users, 
@@ -139,6 +140,9 @@ export default function Sidebar({
             );
           })}
         </nav>
+
+        {/* PWA Install Promotion Banner */}
+        <PWAInstallBanner isCollapsed={!isHovered} />
 
         {/* Footer / User Profile section from bento grid design */}
         <div className={`mt-auto ${isHovered ? "p-3" : "p-3 lg:p-2"} border-t border-[#1a2652]/60 bg-[#060b21]/60 flex flex-col gap-2`}>
